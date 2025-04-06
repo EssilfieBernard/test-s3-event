@@ -31,17 +31,14 @@ warm_containers = "EAGER"
 [dev.deploy.parameters]
 stack_name = "s3-event-notification-dev"
 capabilities = "CAPABILITY_IAM"
-confirm_changeset = true
+confirm_changeset = false
 resolve_s3 = true
-parameter_overrides = "Environment=\"dev\" EmailSubscriptionParam=\"bernard.essilfie@amalitech.com\""
+parameter_overrides = "Environment=dev EmailSubscriptionParam=placeholder@email.com"
 
 # Production environment configurations
-s3_prefix = "s3-event-notification-dev"
-region = "eu-west-1"
-image_repositories = []
 [prod.deploy.parameters]
 stack_name = "s3-event-notification-prod"
 capabilities = "CAPABILITY_IAM"
 confirm_changeset = false
 resolve_s3 = true
-parameter_overrides = "Environment=prod"
+parameter_overrides = "Environment=prod EmailSubscriptionParam=placeholder@email.com"

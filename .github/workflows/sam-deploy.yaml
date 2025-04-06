@@ -47,10 +47,6 @@ jobs:
         run: |
           sam deploy \
             --stack-name s3-event-notification-${{ steps.branch_env.outputs.env }} \
-            --no-confirm-changeset \
             --no-fail-on-empty-changeset \
-            --parameter-overrides \
-              Environment=${{ steps.branch_env.outputs.env }} \
-              EmailSubscriptionParam=${{ secrets.NOTIFICATION_EMAIL }} \
-            --config-env ${{ steps.branch_env.outputs.env }} \
-            --capabilities CAPABILITY_IAM
+            --parameter-overrides EmailSubscriptionParam=${{ secrets.NOTIFICATION_EMAIL }} \
+            --config-env ${{ steps.branch_env.outputs.env }}

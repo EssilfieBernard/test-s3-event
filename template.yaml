@@ -16,7 +16,7 @@ Parameters:
   EmailSubscriptionParam:
     Type: String
     Description: Email address to receive notifications
-    Default: bernard.essilfie@amalitech.com
+    Default: placeholder@email.com
 
 Globals:
   Function:
