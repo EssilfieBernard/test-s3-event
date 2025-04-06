@@ -1,0 +1,47 @@
+version = 0.1
+
+[default.global.parameters]
+stack_name = "s3-sns-eda"
+
+[default.build.parameters]
+cached = true
+parallel = true
+
+[default.validate.parameters]
+lint = true
+
+[default.deploy.parameters]
+capabilities = "CAPABILITY_IAM"
+confirm_changeset = true
+resolve_s3 = true
+
+[default.package.parameters]
+resolve_s3 = true
+
+[default.sync.parameters]
+watch = true
+
+[default.local_start_api.parameters]
+warm_containers = "EAGER"
+
+[default.local_start_lambda.parameters]
+warm_containers = "EAGER"
+
+# Development environment configurations
+[dev.deploy.parameters]
+stack_name = "s3-event-notification-dev"
+capabilities = "CAPABILITY_IAM"
+confirm_changeset = true
+resolve_s3 = true
+parameter_overrides = "Environment=\"dev\" EmailSubscriptionParam=\"bernard.essilfie@amalitech.com\""
+
+# Production environment configurations
+s3_prefix = "s3-event-notification-dev"
+region = "eu-west-1"
+image_repositories = []
+[prod.deploy.parameters]
+stack_name = "s3-event-notification-prod"
+capabilities = "CAPABILITY_IAM"
+confirm_changeset = false
+resolve_s3 = true
+parameter_overrides = "Environment=prod"

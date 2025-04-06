@@ -1,0 +1,85 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  An event-driven application where an S3 object creation event triggers
+  a Java Lambda function that publishes a notification via SNS.
+
+Parameters:
+  Environment:
+    Type: String
+    Default: dev
+    Description: Environment
+    AllowedValues:
+      - dev
+      - prod
+
+  EmailSubscriptionParam:
+    Type: String
+    Description: Email address to receive notifications
+    Default: bernard.essilfie@amalitech.com
+
+Globals:
+  Function:
+    Timeout: 30
+    MemorySize: 128
+
+Resources:
+  UploadBucket:
+    Type: AWS::S3::Bucket
+    DependsOn: S3InvokeLambdaPermission
+    Properties:
+      BucketName: !Sub "upload-bucket-${Environment}-${AWS::AccountId}"
+      NotificationConfiguration:
+        LambdaConfigurations:
+          - Event: s3:ObjectCreated:*
+            Function: !GetAtt NotificationFunction.Arn
+
+  NotificationFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub "notification-function-${Environment}"
+      CodeUri: s3-event-processor
+      Handler: s3event.S3EventHandler::handleRequest
+      Runtime: java21
+      Architectures:
+        - x86_64
+      Environment:
+        Variables:
+          SNS_TOPIC_ARN: !Ref NotificationTopic
+      Policies:
+        - SNSPublishMessagePolicy:
+            TopicName: !GetAtt NotificationTopic.TopicName
+        - S3ReadPolicy:
+            BucketName: !Sub "upload-bucket-${Environment}-${AWS::AccountId}"
+
+  NotificationTopic:
+    Type: AWS::SNS::Topic
+    Properties:
+      TopicName: !Sub "upload-notification-topic-${Environment}"
+
+  EmailSubscription:
+    Type: AWS::SNS::Subscription
+    Properties:
+      Protocol: email
+      Endpoint: !Ref EmailSubscriptionParam
+      TopicArn: !Ref NotificationTopic
+
+  S3InvokeLambdaPermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      Action: lambda:InvokeFunction
+      FunctionName: !Ref NotificationFunction
+      Principal: s3.amazonaws.com
+      SourceAccount: !Ref AWS::AccountId
+      SourceArn: !Sub "arn:${AWS::Partition}:s3:::upload-bucket-${Environment}-${AWS::AccountId}"
+
+Outputs:
+  UploadBucketName:
+    Description: Name of the s3 bucket used for file uploads
+    Value: !Ref UploadBucket
+  NotificationTopicARN:
+    Description: ARN of the SNS topic used for notifications
+    Value: !Ref NotificationTopic
+  LambdaFunction:
+    Description: ARN of the Lambda function
+    Value: !Ref NotificationFunction
