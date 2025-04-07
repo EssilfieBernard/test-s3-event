@@ -33,7 +33,6 @@ stack_name = "s3-event-notification-dev"
 capabilities = "CAPABILITY_IAM"
 confirm_changeset = false
 resolve_s3 = true
-parameter_overrides = "Environment=dev EmailSubscriptionParam=placeholder@email.com"
 
 # Production environment configurations
 [prod.deploy.parameters]
@@ -41,4 +40,3 @@ stack_name = "s3-event-notification-prod"
 capabilities = "CAPABILITY_IAM"
 confirm_changeset = false
 resolve_s3 = true
-parameter_overrides = "Environment=prod EmailSubscriptionParam=placeholder@email.com"
