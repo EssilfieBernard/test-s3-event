@@ -22,7 +22,8 @@ public class S3EventHandler implements RequestHandler<S3Event, String> {
             var eventTime = s3Event.getRecords().getFirst().getEventTime();
             var objectSize = s3Event.getRecords().getFirst().getS3().getObject().getSizeAsLong();
 
-            var subject = "New upload for s3 bucket";
+            var env = environment.equals("prod") ? "production" : "development";
+            var subject = "New upload for s3 bucket " + bucket + " in " + env + " environment";
             var message = String.format(
                     """
                             A new file has been uploaded to your s3 bucket in %s environment.
@@ -33,7 +34,7 @@ public class S3EventHandler implements RequestHandler<S3Event, String> {
                             Size: %s bytes
                             Upload Time: %s
                             """,
-                    environment, bucket, key, objectSize, eventTime
+                    env, bucket, key, objectSize, eventTime
             );
 
             PublishResponse response = snsClient.publish(PublishRequest.builder()
