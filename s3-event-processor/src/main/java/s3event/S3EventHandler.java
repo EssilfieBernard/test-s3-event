@@ -3,13 +3,12 @@ package s3event;
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.RequestHandler;
 import com.amazonaws.services.lambda.runtime.events.S3Event;
-import com.amazonaws.services.sns.AmazonSNS;
-import com.amazonaws.services.sns.AmazonSNSClientBuilder;
-import com.amazonaws.services.sns.model.PublishRequest;
-import com.amazonaws.services.sns.model.PublishResult;
+import software.amazon.awssdk.services.sns.SnsClient;
+import software.amazon.awssdk.services.sns.model.PublishRequest;
+import software.amazon.awssdk.services.sns.model.PublishResponse;
 
 public class S3EventHandler implements RequestHandler<S3Event, String> {
-    private final AmazonSNS snsClient = AmazonSNSClientBuilder.defaultClient();
+    private final SnsClient snsClient = SnsClient.create();
     private final String topicArn = System.getenv("SNS_TOPIC_ARN");
 
     @Override
@@ -36,13 +35,14 @@ public class S3EventHandler implements RequestHandler<S3Event, String> {
                     bucket, key, objectSize, eventTime
             );
 
-            PublishResult result = snsClient.publish(new PublishRequest()
-                    .withTopicArn(topicArn)
-                    .withSubject(subject)
-                    .withMessage(message)
+            PublishResponse response = snsClient.publish(PublishRequest.builder()
+                            .topicArn(topicArn)
+                            .subject(subject)
+                            .message(message)
+                            .build()
             );
 
-            context.getLogger().log("SNS notification sent with message ID: " + result.getMessageId());
+            context.getLogger().log("SNS notification sent with message ID: " + response.messageId());
             return "S3 event processed successfully";
         } catch (Exception e) {
             context.getLogger().log("Error processing S3 event: " + e.getMessage());
