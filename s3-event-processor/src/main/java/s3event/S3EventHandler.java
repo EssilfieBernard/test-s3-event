@@ -10,6 +10,7 @@ import software.amazon.awssdk.services.sns.model.PublishResponse;
 public class S3EventHandler implements RequestHandler<S3Event, String> {
     private final SnsClient snsClient = SnsClient.create();
     private final String topicArn = System.getenv("SNS_TOPIC_ARN");
+    private final String environment = System.getenv("ENVIRONMENT");
 
     @Override
     public String handleRequest(S3Event s3Event, Context context) {
@@ -24,7 +25,7 @@ public class S3EventHandler implements RequestHandler<S3Event, String> {
             var subject = "New upload for s3 bucket";
             var message = String.format(
                     """
-                            A new file has been uploaded to your s3 bucket.
+                            A new file has been uploaded to your s3 bucket in %s environment.
                             
                             Details:
                             Bucket: %s
@@ -32,7 +33,7 @@ public class S3EventHandler implements RequestHandler<S3Event, String> {
                             Size: %s bytes
                             Upload Time: %s
                             """,
-                    bucket, key, objectSize, eventTime
+                    environment, bucket, key, objectSize, eventTime
             );
 
             PublishResponse response = snsClient.publish(PublishRequest.builder()
